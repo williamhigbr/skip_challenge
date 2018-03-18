@@ -9,6 +9,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -26,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
+    private View mLoginFormView;
 
     private AppCompatActivity mActivity;
 
@@ -48,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
         mEmailView = findViewById(R.id.email);
         mPasswordView = findViewById(R.id.password);
         mProgressView = findViewById(R.id.login_progress);
+        mLoginFormView = findViewById(R.id.login_form);
 
 
         ButterKnife.bind(this);
@@ -56,9 +60,6 @@ public class LoginActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEmailView.setText("williamhigino@gmail.com");
-                mPasswordView.setText("wh2807");
-
                 String email = mEmailView.getText().toString();
                 String password = mPasswordView.getText().toString();
                 attemptLogin(email, password);
@@ -79,6 +80,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void attemptLogin(final String email, final String password) {
 
+        mLoginFormView.setVisibility(View.GONE);
         mProgressView.setVisibility(View.VISIBLE);
 
         apiInterface.authCustomer(email, password)
@@ -88,6 +90,12 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
                         Log.e("TAG", "error: " + throwable, throwable);
+                        restoreViews();
+                        new MaterialDialog.Builder(mActivity)
+                                .title(R.string.login_error_title)
+                                .content(R.string.login_error)
+                                .positiveText("Ok")
+                                .show();
                     }
                 })
                 .doOnNext(new Consumer<String>() {
@@ -105,10 +113,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void run() throws Exception {
                         persistentDataManager.SaveModel(new ChartModel(), CURRENT_CHART);
-                        mProgressView.setVisibility(View.GONE);
+                        restoreViews();
                     }
                 }).subscribe();
 
+    }
+
+    private void restoreViews() {
+        mProgressView.setVisibility(View.GONE);
+        mLoginFormView.setVisibility(View.VISIBLE);
     }
 
     private void goToMainActivity() {

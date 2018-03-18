@@ -2,6 +2,7 @@ package br.com.williamhigino.skipchallenge;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,6 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.List;
 
@@ -61,7 +65,24 @@ public class OrdersFragment extends Fragment {
         adapter = new OrdersAdapter(new Consumer<OrderModel>() {
             @Override
             public void accept(final OrderModel item) throws Exception {
-                //TODO: manage order click
+                new MaterialDialog.Builder(mActivity)
+                        .title(R.string.orders_cancel_title)
+                        .content(R.string.orders_cancel)
+                        .positiveText(R.string.orders_cancel_yes)
+                        .neutralText(R.string.orders_cancel_no)
+                        .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                                cancelOrder(item);
+                            }
+                        })
+                        .show();
             }
         });
         ordersRecycler.setLayoutManager(new GridLayoutManager(mActivity, 1));
@@ -100,6 +121,30 @@ public class OrdersFragment extends Fragment {
                     }
                 }).subscribe();
 
+
+    }
+
+    private void cancelOrder(OrderModel orderModel) {
+
+        orderModel.status = "canceled";
+
+        CustomerModel currentCustomer = persistentDataManager.ReadModel(CURRENT_CUSTOMER, CustomerModel.class);
+        String authorization = "Bearer " + currentCustomer.token;
+        apiInterface.placeOrder(authorization, orderModel)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.e("TAG", "error: " + throwable, throwable);
+                    }
+                })
+                .doOnNext(new Consumer<OrderModel>() {
+                    @Override
+                    public void accept(OrderModel orderModel) throws Exception {
+                        adapter.notifyDataSetChanged();
+                    }
+                }).subscribe();
 
     }
 }

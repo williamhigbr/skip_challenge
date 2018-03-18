@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
@@ -37,6 +39,9 @@ public class ChartFragment extends Fragment {
 
     @BindView(R.id.place_order_button)
     Button placeOrderButton;
+
+    @BindView(R.id.empty_cart_text)
+    TextView emptyCartText;
 
     private OrderItemsAdapter adapter;
 
@@ -89,7 +94,7 @@ public class ChartFragment extends Fragment {
                                 ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
                                 currentChart.removeItem(item);
                                 persistentDataManager.SaveModel(currentChart, PersistentDataManager.CURRENT_CHART);
-                                adapter.setItems(currentChart.orderItems);
+                                loadChartItems();
                             }
                         })
                         .show();
@@ -98,10 +103,13 @@ public class ChartFragment extends Fragment {
         chartRecycler.setLayoutManager(new GridLayoutManager(mActivity, 1));
         chartRecycler.setAdapter(adapter);
 
+        chartRecycler.setVisibility(View.GONE);
+        emptyCartText.setVisibility(View.GONE);
+
         placeOrderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                placeOrder();
+                prepareOrder();
             }
         });
 
@@ -123,36 +131,89 @@ public class ChartFragment extends Fragment {
         ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
         adapter.setItems(currentChart.orderItems);
 
+        if(currentChart.orderItems.size() > 0) {
+            chartRecycler.setVisibility(View.VISIBLE);
+            emptyCartText.setVisibility(View.GONE);
+        }
+        else {
+            chartRecycler.setVisibility(View.GONE);
+            emptyCartText.setVisibility(View.VISIBLE);
+        }
+
     }
 
-    private void placeOrder() {
+    private void prepareOrder() {
 
         final ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
-        List<OrderModel> orderModels = OrderModel.getOrdersFromChart(currentChart);
+        final List<OrderModel> orderModels = OrderModel.getOrdersFromChart(currentChart);
+
+        if(orderModels.size() == 0) {
+            new MaterialDialog.Builder(mActivity)
+                    .title(R.string.chart_empty_title)
+                    .content(R.string.chart_empty)
+                    .positiveText("Ok")
+                    .show();
+        }
+        else if(orderModels.size() > 1) {
+            new MaterialDialog.Builder(mActivity)
+                    .title(R.string.chart_several_restaurants_title)
+                    .content(R.string.chart_several_restaurants)
+                    .positiveText(R.string.chart_several_restaurants_yes)
+                    .neutralText(R.string.chart_several_restaurants_no)
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            placeOrders(orderModels);
+                        }
+                    })
+                    .show();
+        }
+        else {
+            placeOrders(orderModels);
+        }
+
+    }
+
+    private void placeOrders(List<OrderModel> orderModels) {
 
         CustomerModel currentCustomer = persistentDataManager.ReadModel(CURRENT_CUSTOMER, CustomerModel.class);
-        String authorization = "Bearer " + currentCustomer.token;
-        //TODO: send all orders
-        apiInterface.placeOrder(authorization, orderModels.get(0))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
+        final String authorization = "Bearer " + currentCustomer.token;
+        Observable.fromIterable(orderModels)
+                .doOnNext(new Consumer<OrderModel>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Log.e("TAG", "error: " + throwable, throwable);
+                    public void accept(OrderModel orderModel) throws Exception {
+                        apiInterface.placeOrder(authorization, orderModel)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .doOnError(new Consumer<Throwable>() {
+                                    @Override
+                                    public void accept(Throwable throwable) throws Exception {
+                                        Log.e("TAG", "error: " + throwable, throwable);
+                                    }
+                                }).subscribe();
+
                     }
                 })
                 .doOnComplete(new Action() {
                     @Override
                     public void run() throws Exception {
-                        //TODO: dialog de sucesso
+                        new MaterialDialog.Builder(mActivity)
+                                .title(R.string.chart_order_placed_title)
+                                .content(R.string.chart_order_placed)
+                                .positiveText("Ok")
+                                .show();
                         //clears latest chart info
                         persistentDataManager.SaveModel(new ChartModel(), CURRENT_CHART);
                         adapter.setItems(new ArrayList<OrderItemModel>());
                     }
                 }).subscribe();
 
-        Log.d("ChartFragment", orderModels.toString());
     }
 
 }

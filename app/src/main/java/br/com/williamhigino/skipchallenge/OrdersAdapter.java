@@ -27,7 +27,7 @@ public class OrdersAdapter extends RecyclerView.Adapter {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.holder_product, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.holder_order, parent, false);
         return new ItemViewHolder(itemView);
     }
 
@@ -37,9 +37,10 @@ public class OrdersAdapter extends RecyclerView.Adapter {
         OrderModel item = items.get(position);
 
         //sets elements
-        itemViewHolder.nameText.setText(item.deliveryAddress);
-        itemViewHolder.descriptionText.setText(item.contact);
+        itemViewHolder.nameText.setText(""+item.storeId);
+        itemViewHolder.dateText.setText(item.date.toString());
         itemViewHolder.priceText.setText(item.formattedPrice());
+        itemViewHolder.statusText.setText(item.formattedStatus());
     }
 
     public void setItems(List<OrderModel> orderModels) {
@@ -59,10 +60,12 @@ public class OrdersAdapter extends RecyclerView.Adapter {
         CardView holderCardView;
         @BindView(R.id.name_text)
         TextView nameText;
-        @BindView(R.id.description_text)
-        TextView descriptionText;
+        @BindView(R.id.date_text)
+        TextView dateText;
         @BindView(R.id.price_text)
         TextView priceText;
+        @BindView(R.id.status_text)
+        TextView statusText;
 
         ItemViewHolder(View view) {
             super(view);

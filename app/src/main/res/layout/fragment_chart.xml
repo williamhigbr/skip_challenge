@@ -6,8 +6,16 @@
         android:id="@+id/chart_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/chart_recycler"
+        android:layout_above="@id/place_order_button"
         android:overScrollMode="never"/>
+
+    <TextView
+        android:id="@+id/empty_cart_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center"
+        android:text="@string/chart_empty_view"/>
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/place_order_button"

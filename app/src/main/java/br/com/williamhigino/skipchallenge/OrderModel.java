@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class OrderModel implements Serializable{
     @SerializedName("id")
     public int id;
     @SerializedName("date")
-    public String date;
+    public Date date;
     @SerializedName("customerId")
     public int customerId;
     @SerializedName("deliveryAddress")
@@ -30,11 +31,25 @@ public class OrderModel implements Serializable{
     @SerializedName("status")
     public String status;
     @SerializedName("lastUpdate")
-    public String lastUpdate;
+    public Date lastUpdate;
 
     public String formattedPrice() {
         NumberFormat formatter = new DecimalFormat("$ #,###.##");
         return formatter.format(total);
+    }
+
+
+    public String formattedStatus() {
+        String formStatus = "Unknown";
+        switch (status) {
+            case "WAITING":
+                formStatus = "Waiting for approval";
+                break;
+            case "CANCELED":
+                formStatus = "Canceled";
+                break;
+        }
+        return formStatus;
     }
 
     public static List<OrderModel> getOrdersFromChart(ChartModel chart) {

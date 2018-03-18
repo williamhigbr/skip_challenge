@@ -3,15 +3,36 @@
     <string name="title_activity_login">Login</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
+
+    <string name="login_error_title">Login error</string>
+    <string name="login_error">There was an error signing in. Please check you username and password.</string>
+
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="products_add_to_chart">Add product to chart</string>
+    <string name="products_add_to_chart">Add product to cart</string>
     <string name="products_add_to_chart_yes">Yes!</string>
     <string name="products_add_to_chart_no">Maybe later</string>
-    <string name="products_remove_from_chart">Remove product from chart</string>
+    <string name="products_remove_from_chart">Remove product from cart</string>
     <string name="products_remove_from_chart_yes">Remove</string>
-    <string name="products_remove_from_chart_neutral">Cancel</string>
+    <string name="products_remove_from_chart_neutral">Never mind</string>
+
+
+    <string name="chart_empty_title">Empty chart</string>
+    <string name="chart_empty_view">There are no items in your cart.</string>
+    <string name="chart_empty">There are no items in your cart. Before placing an order, please pick some items.</string>
+    <string name="chart_several_restaurants_title">Different restaurants</string>
+    <string name="chart_several_restaurants">Your cart contains products from several restaurants. Placing this order will create different orders, one for each restaurant. Proceed?</string>
+    <string name="chart_several_restaurants_yes">Yes</string>
+    <string name="chart_several_restaurants_no">Let me review it</string>
+    <string name="chart_order_placed_title">Your order was placed</string>
+    <string name="chart_order_placed">Check its status or cancel it using the orders screen.</string>
+
+
+    <string name="orders_cancel_title">Cancel order</string>
+    <string name="orders_cancel">Would you like to cancel this order?</string>
+    <string name="orders_cancel_yes">Yes</string>
+    <string name="orders_cancel_no">Never mind</string>
 </resources>

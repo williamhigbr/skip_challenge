@@ -1,12 +1,13 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.screens.cart;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Random;
+
+import br.com.williamhigino.skipchallenge.screens.products.ProductModel;
 
 public class OrderItemModel implements Serializable{
 

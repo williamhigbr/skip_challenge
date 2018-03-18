@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.screens.products;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -19,6 +19,12 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.List;
 
+import br.com.williamhigino.skipchallenge.util.APIClient;
+import br.com.williamhigino.skipchallenge.util.APIRxJavaInterface;
+import br.com.williamhigino.skipchallenge.screens.cart.ChartModel;
+import br.com.williamhigino.skipchallenge.screens.cart.OrderItemModel;
+import br.com.williamhigino.skipchallenge.util.PersistentDataManager;
+import br.com.williamhigino.skipchallenge.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;

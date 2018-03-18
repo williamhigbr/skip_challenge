@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.screens.products;
 
 import com.google.gson.annotations.SerializedName;
 

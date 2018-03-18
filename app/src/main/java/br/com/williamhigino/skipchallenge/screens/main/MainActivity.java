@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.screens.main;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,11 +15,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import butterknife.BindView;
+import br.com.williamhigino.skipchallenge.screens.cart.ChartFragment;
+import br.com.williamhigino.skipchallenge.screens.orders.OrdersFragment;
+import br.com.williamhigino.skipchallenge.util.PersistentDataManager;
+import br.com.williamhigino.skipchallenge.screens.products.ProductsFragment;
+import br.com.williamhigino.skipchallenge.R;
+import br.com.williamhigino.skipchallenge.screens.login.CustomerModel;
+import br.com.williamhigino.skipchallenge.screens.login.LoginActivity;
 import butterknife.ButterKnife;
 
-import static br.com.williamhigino.skipchallenge.PersistentDataManager.CURRENT_CHART;
-import static br.com.williamhigino.skipchallenge.PersistentDataManager.CURRENT_CUSTOMER;
+import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CHART;
+import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CUSTOMER;
 
 
 public class MainActivity extends AppCompatActivity {

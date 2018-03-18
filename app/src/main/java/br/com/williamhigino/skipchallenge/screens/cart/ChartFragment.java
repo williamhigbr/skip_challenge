@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.screens.cart;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -20,6 +20,12 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.williamhigino.skipchallenge.util.APIClient;
+import br.com.williamhigino.skipchallenge.util.APIRxJavaInterface;
+import br.com.williamhigino.skipchallenge.screens.orders.OrderModel;
+import br.com.williamhigino.skipchallenge.util.PersistentDataManager;
+import br.com.williamhigino.skipchallenge.R;
+import br.com.williamhigino.skipchallenge.screens.login.CustomerModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
@@ -28,8 +34,8 @@ import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-import static br.com.williamhigino.skipchallenge.PersistentDataManager.CURRENT_CHART;
-import static br.com.williamhigino.skipchallenge.PersistentDataManager.CURRENT_CUSTOMER;
+import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CHART;
+import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CUSTOMER;
 
 
 public class ChartFragment extends Fragment {

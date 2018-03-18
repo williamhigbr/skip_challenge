@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

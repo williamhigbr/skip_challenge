@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,7 +14,7 @@ public class APIClient {
 
     private static final String BASE_URL = "http://api-vanhack-event-sp.azurewebsites.net/";
 
-    static Retrofit getStringRxJavaClient() {
+    public static Retrofit getStringRxJavaClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -31,7 +31,7 @@ public class APIClient {
         return stringRetrofit;
     }
 
-    static Retrofit getRxJavaClient() {
+    public static Retrofit getRxJavaClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

@@ -1,7 +1,10 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.util;
 
 import java.util.List;
 
+import br.com.williamhigino.skipchallenge.screens.login.CustomerModel;
+import br.com.williamhigino.skipchallenge.screens.orders.OrderModel;
+import br.com.williamhigino.skipchallenge.screens.products.ProductModel;
 import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -9,7 +12,6 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
-import retrofit2.http.Query;
 
 /**
  * Created by williamhigino on 11/03/2018.

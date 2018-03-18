@@ -1,4 +1,4 @@
-package br.com.williamhigino.skipchallenge;
+package br.com.williamhigino.skipchallenge.screens.orders;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import br.com.williamhigino.skipchallenge.screens.cart.ChartModel;
+import br.com.williamhigino.skipchallenge.screens.cart.OrderItemModel;
 
 public class OrderModel implements Serializable{
 

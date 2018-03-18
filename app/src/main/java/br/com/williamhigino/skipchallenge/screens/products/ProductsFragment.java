@@ -8,7 +8,6 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,27 +18,23 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.List;
 
+import br.com.williamhigino.skipchallenge.R;
 import br.com.williamhigino.skipchallenge.util.APIClient;
 import br.com.williamhigino.skipchallenge.util.APIRxJavaInterface;
-import br.com.williamhigino.skipchallenge.screens.cart.ChartModel;
-import br.com.williamhigino.skipchallenge.screens.cart.OrderItemModel;
 import br.com.williamhigino.skipchallenge.util.PersistentDataManager;
-import br.com.williamhigino.skipchallenge.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 
-public class ProductsFragment extends Fragment {
+public class ProductsFragment extends Fragment implements ProductsView {
 
     @BindView(R.id.products_recycler)
     RecyclerView productsRecycler;
 
     private ProductsAdapter adapter;
 
-    private APIRxJavaInterface apiInterface;
+    private ProductsPresenter presenter;
 
     private Activity mActivity;
 
@@ -61,8 +56,11 @@ public class ProductsFragment extends Fragment {
 
         mActivity = getActivity();
 
-        apiInterface = APIClient.getRxJavaClient().create(APIRxJavaInterface.class);
-
+        presenter = new ProductsPresenter(
+                this,
+                APIClient.getRxJavaClient().create(APIRxJavaInterface.class),
+                PersistentDataManager.getInstance(mActivity)
+        );
 
         BottomNavigationView navigation = view.findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -80,12 +78,7 @@ public class ProductsFragment extends Fragment {
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                //saves current chart in prefs
-                                PersistentDataManager persistentDataManager = PersistentDataManager.getInstance(mActivity);
-                                ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
-                                currentChart.orderItems.add(new OrderItemModel(item, 1));
-                                //TODO: include quantity in dialog
-                                persistentDataManager.SaveModel(currentChart, PersistentDataManager.CURRENT_CHART);
+                                presenter.manageProductClick(item);
                             }
                         })
                         .show();
@@ -95,27 +88,7 @@ public class ProductsFragment extends Fragment {
         productsRecycler.setAdapter(adapter);
 
         //gets products list
-        getProducts();
-    }
-
-    private void getProducts() {
-
-        apiInterface.getProducts()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Log.e("TAG", "error: " + throwable, throwable);
-                    }
-                })
-                .doOnNext(new Consumer<List<ProductModel>>() {
-                    @Override
-                    public void accept(List<ProductModel> productModels) throws Exception {
-                        adapter.addItems(productModels);
-                    }
-                }).subscribe();
-
+        presenter.getProducts();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -128,5 +101,10 @@ public class ProductsFragment extends Fragment {
         }
 
     };
+
+    @Override
+    public void addItems(List<ProductModel> productModels) {
+        adapter.addItems(productModels);
+    }
 }
 

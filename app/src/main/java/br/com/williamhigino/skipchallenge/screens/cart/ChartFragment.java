@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,28 +16,19 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import br.com.williamhigino.skipchallenge.R;
+import br.com.williamhigino.skipchallenge.screens.orders.OrderModel;
 import br.com.williamhigino.skipchallenge.util.APIClient;
 import br.com.williamhigino.skipchallenge.util.APIRxJavaInterface;
-import br.com.williamhigino.skipchallenge.screens.orders.OrderModel;
 import br.com.williamhigino.skipchallenge.util.PersistentDataManager;
-import br.com.williamhigino.skipchallenge.R;
-import br.com.williamhigino.skipchallenge.screens.login.CustomerModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-
-import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CHART;
-import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CUSTOMER;
 
 
-public class ChartFragment extends Fragment {
+public class ChartFragment extends Fragment implements ChartView {
 
     @BindView(R.id.chart_recycler)
     RecyclerView chartRecycler;
@@ -51,11 +41,9 @@ public class ChartFragment extends Fragment {
 
     private OrderItemsAdapter adapter;
 
-    private APIRxJavaInterface apiInterface;
-
     private Activity mActivity;
 
-    private PersistentDataManager persistentDataManager;
+    private ChartPresenter presenter;
 
     public ChartFragment() {
         // Required empty public constructor
@@ -75,9 +63,11 @@ public class ChartFragment extends Fragment {
 
         mActivity = getActivity();
 
-        apiInterface = APIClient.getRxJavaClient().create(APIRxJavaInterface.class);
-
-        persistentDataManager = PersistentDataManager.getInstance(mActivity);
+        presenter = new ChartPresenter(
+                this,
+                APIClient.getRxJavaClient().create(APIRxJavaInterface.class),
+                PersistentDataManager.getInstance(mActivity)
+        );
 
         //initializes
         adapter = new OrderItemsAdapter(new Consumer<OrderItemModel>() {
@@ -97,10 +87,7 @@ public class ChartFragment extends Fragment {
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
-                                currentChart.removeItem(item);
-                                persistentDataManager.SaveModel(currentChart, PersistentDataManager.CURRENT_CHART);
-                                loadChartItems();
+                                presenter.manageOrderItemClick(item);
                             }
                         })
                         .show();
@@ -115,27 +102,26 @@ public class ChartFragment extends Fragment {
         placeOrderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prepareOrder();
+                presenter.prepareOrder();
             }
         });
 
         //loads current chart
-        loadChartItems();
+        presenter.loadChartItems();
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if(!hidden) {
-            loadChartItems();
+            presenter.loadChartItems();
         }
     }
 
+    @Override
+    public void loadChartItems(ChartModel currentChart) {
 
-    private void loadChartItems() {
-
-        ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
-        adapter.setItems(currentChart.orderItems);
+        setItems(currentChart.orderItems);
 
         if(currentChart.orderItems.size() > 0) {
             chartRecycler.setVisibility(View.VISIBLE);
@@ -148,78 +134,50 @@ public class ChartFragment extends Fragment {
 
     }
 
-    private void prepareOrder() {
 
-        final ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
-        final List<OrderModel> orderModels = OrderModel.getOrdersFromChart(currentChart);
-
-        if(orderModels.size() == 0) {
-            new MaterialDialog.Builder(mActivity)
-                    .title(R.string.chart_empty_title)
-                    .content(R.string.chart_empty)
-                    .positiveText("Ok")
-                    .show();
-        }
-        else if(orderModels.size() > 1) {
-            new MaterialDialog.Builder(mActivity)
-                    .title(R.string.chart_several_restaurants_title)
-                    .content(R.string.chart_several_restaurants)
-                    .positiveText(R.string.chart_several_restaurants_yes)
-                    .neutralText(R.string.chart_several_restaurants_no)
-                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            placeOrders(orderModels);
-                        }
-                    })
-                    .show();
-        }
-        else {
-            placeOrders(orderModels);
-        }
-
+    @Override
+    public void showChartEmptyDialog() {
+        new MaterialDialog.Builder(mActivity)
+                .title(R.string.chart_empty_title)
+                .content(R.string.chart_empty)
+                .positiveText("Ok")
+                .show();
     }
 
-    private void placeOrders(List<OrderModel> orderModels) {
-
-        CustomerModel currentCustomer = persistentDataManager.ReadModel(CURRENT_CUSTOMER, CustomerModel.class);
-        final String authorization = "Bearer " + currentCustomer.token;
-        Observable.fromIterable(orderModels)
-                .doOnNext(new Consumer<OrderModel>() {
+    @Override
+    public void showSeveralRestaurantsDialog(final List<OrderModel> orderModels) {
+        new MaterialDialog.Builder(mActivity)
+                .title(R.string.chart_several_restaurants_title)
+                .content(R.string.chart_several_restaurants)
+                .positiveText(R.string.chart_several_restaurants_yes)
+                .neutralText(R.string.chart_several_restaurants_no)
+                .onNeutral(new MaterialDialog.SingleButtonCallback() {
                     @Override
-                    public void accept(OrderModel orderModel) throws Exception {
-                        apiInterface.placeOrder(authorization, orderModel)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .doOnError(new Consumer<Throwable>() {
-                                    @Override
-                                    public void accept(Throwable throwable) throws Exception {
-                                        Log.e("TAG", "error: " + throwable, throwable);
-                                    }
-                                }).subscribe();
-
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
                     }
                 })
-                .doOnComplete(new Action() {
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
-                    public void run() throws Exception {
-                        new MaterialDialog.Builder(mActivity)
-                                .title(R.string.chart_order_placed_title)
-                                .content(R.string.chart_order_placed)
-                                .positiveText("Ok")
-                                .show();
-                        //clears latest chart info
-                        persistentDataManager.SaveModel(new ChartModel(), CURRENT_CHART);
-                        adapter.setItems(new ArrayList<OrderItemModel>());
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        presenter.placeOrders(orderModels);
                     }
-                }).subscribe();
+                })
+                .show();
+    }
 
+    @Override
+    public void showOrderPlacedDialog() {
+        new MaterialDialog.Builder(mActivity)
+                .title(R.string.chart_order_placed_title)
+                .content(R.string.chart_order_placed)
+                .positiveText("Ok")
+                .show();
+    }
+
+    @Override
+    public void setItems(List<OrderItemModel> orderItemModels) {
+        adapter.setItems(orderItemModels);
     }
 
 }

@@ -31,18 +31,16 @@ import io.reactivex.schedulers.Schedulers;
 import static br.com.williamhigino.skipchallenge.util.PersistentDataManager.CURRENT_CUSTOMER;
 
 
-public class OrdersFragment extends Fragment {
+public class OrdersFragment extends Fragment implements OrdersView {
 
     @BindView(R.id.orders_recycler)
     RecyclerView ordersRecycler;
 
     private OrdersAdapter adapter;
 
-    private APIRxJavaInterface apiInterface;
-
     private Activity mActivity;
 
-    private PersistentDataManager persistentDataManager;
+    private OrdersPresenter presenter;
 
     public OrdersFragment() {
         // Required empty public constructor
@@ -62,9 +60,11 @@ public class OrdersFragment extends Fragment {
 
         mActivity = getActivity();
 
-        apiInterface = APIClient.getRxJavaClient().create(APIRxJavaInterface.class);
-
-        persistentDataManager = PersistentDataManager.getInstance(mActivity);
+        presenter = new OrdersPresenter(
+                this,
+                APIClient.getRxJavaClient().create(APIRxJavaInterface.class),
+                PersistentDataManager.getInstance(mActivity)
+        );
 
         //initializes
         adapter = new OrdersAdapter(new Consumer<OrderModel>() {
@@ -84,7 +84,7 @@ public class OrdersFragment extends Fragment {
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                                cancelOrder(item);
+                                presenter.cancelOrder(item);
                             }
                         })
                         .show();
@@ -94,63 +94,27 @@ public class OrdersFragment extends Fragment {
         ordersRecycler.setAdapter(adapter);
 
         //loads current chart
-        loadOrders();
+        presenter.loadOrders();
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if(!hidden) {
-            loadOrders();
+            presenter.loadOrders();
         }
     }
 
 
-    private void loadOrders() {
 
-        CustomerModel currentCustomer = persistentDataManager.ReadModel(CURRENT_CUSTOMER, CustomerModel.class);
-        String authorization = "Bearer " + currentCustomer.token;
-        apiInterface.getOrders(authorization)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Log.e("TAG", "error: " + throwable, throwable);
-                    }
-                })
-                .doOnNext(new Consumer<List<OrderModel>>() {
-                    @Override
-                    public void accept(List<OrderModel> orderModels) throws Exception {
-                        adapter.setItems(orderModels);
-                    }
-                }).subscribe();
-
-
+    @Override
+    public void setItems(List<OrderModel> orderModels) {
+        adapter.setItems(orderModels);
     }
 
-    private void cancelOrder(OrderModel orderModel) {
-
-        orderModel.status = "canceled";
-
-        CustomerModel currentCustomer = persistentDataManager.ReadModel(CURRENT_CUSTOMER, CustomerModel.class);
-        String authorization = "Bearer " + currentCustomer.token;
-        apiInterface.placeOrder(authorization, orderModel)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Log.e("TAG", "error: " + throwable, throwable);
-                    }
-                })
-                .doOnNext(new Consumer<OrderModel>() {
-                    @Override
-                    public void accept(OrderModel orderModel) throws Exception {
-                        adapter.notifyDataSetChanged();
-                    }
-                }).subscribe();
-
+    @Override
+    public void updateItems() {
+        adapter.notifyDataSetChanged();
     }
 }
 

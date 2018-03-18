@@ -6,7 +6,6 @@ import java.io.Serializable;
 
 public class CustomerModel implements Serializable{
 
-
     @SerializedName("id")
     public int id;
     @SerializedName("email")
@@ -19,16 +18,7 @@ public class CustomerModel implements Serializable{
     public String creation;
     @SerializedName("password")
     public String password;
+    @SerializedName("token")
+    public String token;
 
-    public CustomerModel() {
-    }
-
-    public CustomerModel(int id, String email, String name, String address, String creation, String password) {
-        this.id = id;
-        this.email = email;
-        this.name = name;
-        this.address = address;
-        this.creation = creation;
-        this.password = password;
-    }
 }

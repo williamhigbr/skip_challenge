@@ -77,7 +77,8 @@ public class ProductsFragment extends Fragment {
                                 //saves current chart in prefs
                                 PersistentDataManager persistentDataManager = PersistentDataManager.getInstance(mActivity);
                                 ChartModel currentChart = persistentDataManager.ReadModel(PersistentDataManager.CURRENT_CHART, ChartModel.class);
-                                currentChart.orderItems.add(new OrderItemModel(item, 1, 1));
+                                currentChart.orderItems.add(new OrderItemModel(item, 1));
+                                //TODO: include quantity in dialog
                                 persistentDataManager.SaveModel(currentChart, PersistentDataManager.CURRENT_CHART);
                             }
                         })

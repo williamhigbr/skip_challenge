@@ -6,6 +6,20 @@
         android:id="@+id/chart_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/chart_recycler"
         android:overScrollMode="never"/>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/place_order_button"
+        android:text="Place Order"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textAllCaps="false"
+        android:padding="8dp"
+        android:layout_height="48dp" />
 
 </RelativeLayout>

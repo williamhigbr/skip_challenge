@@ -13,6 +13,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static br.com.williamhigino.skipchallenge.PersistentDataManager.CURRENT_CHART;
 import static br.com.williamhigino.skipchallenge.PersistentDataManager.CURRENT_CUSTOMER;
@@ -22,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String productsTAG = "productsBrowserFragment";
     private String chartTAG = "chartFragment";
+    private String ordersTAG = "ordersFragment";
 
     private Activity mActivity;
 
@@ -29,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
+
+    TextView emailHeaderText;
 
     private void SwitchFragment(int id)
     {
@@ -41,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
             fragmentManager.beginTransaction().hide(fragmentManager.findFragmentByTag(productsTAG)).commit();
         if(id != R.id.nav_chart && fragmentManager.findFragmentByTag(chartTAG) != null)
             fragmentManager.beginTransaction().hide(fragmentManager.findFragmentByTag(chartTAG)).commit();
+        if(id != R.id.nav_orders && fragmentManager.findFragmentByTag(ordersTAG) != null)
+            fragmentManager.beginTransaction().hide(fragmentManager.findFragmentByTag(ordersTAG)).commit();
 
         switch(id) {
             case R.id.nav_products_browser:
@@ -52,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
                 curFragTAG = chartTAG;
                 newFrag = new ChartFragment();
                 navigationView.setCheckedItem(R.id.nav_chart);
+                break;
+            case R.id.nav_orders:
+                curFragTAG = ordersTAG;
+                newFrag = new OrdersFragment();
+                navigationView.setCheckedItem(R.id.nav_orders);
                 break;
         }
 
@@ -72,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
+
         mActivity = this;
 
         persistentDataManager = PersistentDataManager.getInstance(mActivity);
@@ -87,6 +103,10 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
+
+        CustomerModel currentCustomer = persistentDataManager.ReadModel(CURRENT_CUSTOMER, CustomerModel.class);
+        emailHeaderText = navigationView.getHeaderView(0).findViewById(R.id.email_header_text);
+        emailHeaderText.setText(currentCustomer.email);
 
         SwitchFragment(R.id.nav_products_browser);
     }

@@ -96,6 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                         CustomerModel customerModel = new CustomerModel();
                         customerModel.email = email;
                         customerModel.password = password;
+                        customerModel.token = s;
                         persistentDataManager.SaveModel(customerModel, CURRENT_CUSTOMER);
                         goToMainActivity();
                     }

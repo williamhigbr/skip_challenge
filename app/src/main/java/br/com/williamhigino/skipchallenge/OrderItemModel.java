@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Random;
 
 public class OrderItemModel implements Serializable{
 
@@ -23,11 +24,14 @@ public class OrderItemModel implements Serializable{
     public int quantity;
     @SerializedName("total")
     public double total;
+    @SerializedName("internalId")
+    public int internalId;
 
-    public OrderItemModel(ProductModel product, int quantity, int orderId) {
+    public OrderItemModel(ProductModel product, int quantity) {
+        this.internalId = new Random().nextInt() % 100000;
         this.product = product;
         this.productId = product.id;
-        this.orderId = orderId;
+        this.orderId = product.storeId;
         this.quantity = quantity;
         this.total = quantity * product.price;
     }

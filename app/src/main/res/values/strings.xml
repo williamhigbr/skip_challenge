@@ -11,4 +11,7 @@
     <string name="products_add_to_chart">Add product to chart</string>
     <string name="products_add_to_chart_yes">Yes!</string>
     <string name="products_add_to_chart_no">Maybe later</string>
+    <string name="products_remove_from_chart">Remove product from chart</string>
+    <string name="products_remove_from_chart_yes">Remove</string>
+    <string name="products_remove_from_chart_neutral">Cancel</string>
 </resources>

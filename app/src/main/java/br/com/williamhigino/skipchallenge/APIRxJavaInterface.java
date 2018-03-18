@@ -7,6 +7,7 @@ import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -25,4 +26,10 @@ public interface APIRxJavaInterface {
 
     @GET("/api/v1/Product")
     Observable<List<ProductModel>> getProducts();
+
+    @GET("/api/v1/Order/customer")
+    Observable<List<OrderModel>> getOrders(@Header("Authorization") String authorization);
+
+    @POST("/api/v1/Order")
+    Observable<OrderModel> placeOrder(@Header("Authorization") String authorization, @Body OrderModel orderModel);
 }
